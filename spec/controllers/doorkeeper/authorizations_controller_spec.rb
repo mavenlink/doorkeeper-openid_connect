@@ -269,4 +269,21 @@ describe Doorkeeper::AuthorizationsController, type: :controller do
       expect(response.status).to be(302)
     end
   end
+
+  describe 'with openid scope but missing response_type and client params' do
+    it 'returns an unsupported_response_type error' do
+      get :new, params: {
+        redirect_uri: application.redirect_uri,
+        scope: 'openid',
+      }
+
+      error_params = {
+        'error' => 'unsupported_response_type',
+        'error_description' => 'The authorization server does not support this response type.'
+      }
+
+      expect(response).to redirect_to build_redirect_uri(error_params)
+      expect(JSON.parse(response.body)).to eq(error_params)
+    end
+  end
 end
